@@ -1,0 +1,82 @@
+/* Estilo general para todas las páginas */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+h1, h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Formularios comunes */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+input, select, textarea {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+button {
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+/* Botón principal (crear/editar) */
+button.primary {
+    background: #3498db;
+    color: #fff;
+}
+button.primary:hover {
+    background: #2980b9;
+}
+
+/* Botón de eliminar */
+button.danger {
+    background: #e74c3c;
+    color: #fff;
+}
+button.danger:hover {
+    background: #c0392b;
+}
+
+/* Botón de cancelar */
+button.secondary {
+    background: #95a5a6;
+    color: #fff;
+}
+button.secondary:hover {
+    background: #7f8c8d;
+}
+
+/* Mensajes de confirmación */
+.confirm {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #444;
+}
