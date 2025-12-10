@@ -6,7 +6,7 @@ session_start();
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (iniciarSesion($_POST['email'], $_POST['password'], $mysqli)) {
+    if (iniciarSesion($_POST['nombre'], $_POST['password'], $mysqli)) {
         header("Location: home.php");
         exit();
     } else {
@@ -29,8 +29,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <?php endif; ?>
 
   <form method="post" class="login-form">
-    <label>Email</label>
-    <input type="email" name="email" required>
+    <label>Nombre de usuario</label>
+    <input type="text" name="nombre" required>
 
     <label>Contraseña</label>
     <input type="password" name="password" required>

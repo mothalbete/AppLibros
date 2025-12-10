@@ -206,3 +206,76 @@ h1, h2 {
     max-height: 80px;
   }
 }
+.filters {
+  max-width: 800px;
+  margin: 20px auto;
+  background: #fff8e1;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(93,64,55,0.2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.filters label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.filters select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95em;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.filters button, .filters .btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.95em;
+  background: #6d4c41;
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.filters button:hover, .filters .btn:hover {
+  background: #4e342e;
+}
+
+/* Responsivo para filtros */
+@media (max-width: 600px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filters button, .filters .btn {
+    width: 100%;
+    text-align: center;
+  }
+}

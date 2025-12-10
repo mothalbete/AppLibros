@@ -1,7 +1,7 @@
 <?php
-function iniciarSesion($email, $password, $mysqli) {
-    $stmt = $mysqli->prepare("SELECT usuario_id FROM usuarios WHERE email=? AND password=?");
-    $stmt->bind_param("ss", $email, $password);
+function iniciarSesion($nombre, $password, $mysqli) {
+    $stmt = $mysqli->prepare("SELECT usuario_id FROM usuarios WHERE nombre=? AND password=?");
+    $stmt->bind_param("ss", $nombre, $password);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -93,4 +93,3 @@ function eliminarLibro($id, $mysqli) {
     return $ok;
 }
 ?>
-<link rel="stylesheet" href="styles.css">
