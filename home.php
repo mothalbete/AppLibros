@@ -3,31 +3,30 @@ require_once("session.php");
 require_once("config.php");
 require_once("functions.php");
 
-// --- Obtener filtros disponibles ---
 $autores = $mysqli->query("SELECT DISTINCT autor FROM libros WHERE autor IS NOT NULL AND autor <> ''");
 $titulos = $mysqli->query("SELECT DISTINCT titulo FROM libros WHERE titulo IS NOT NULL AND titulo <> ''");
+$generos = $mysqli->query("SELECT DISTINCT nombre FROM generos");
 
-// --- Procesar filtros seleccionados ---
 $filtroAutor = $_GET['autor'] ?? '';
 $filtroTitulo = $_GET['titulo'] ?? '';
+$filtroGenero = $_GET['genero'] ?? '';
 $recomendacion = isset($_GET['recomendacion']);
 
-$hayFiltros = $filtroAutor || $filtroTitulo || $recomendacion;
+$hayFiltros = $filtroAutor || $filtroTitulo || $filtroGenero || $recomendacion;
 
-// --- Si hay filtros, preparar consulta filtrada ---
 $librosFiltrados = null;
 $libroRecomendado = null;
 
 if ($hayFiltros) {
     if ($recomendacion) {
-        $randQuery = "SELECT u.nombre, l.titulo, l.sinopsis, l.autor, l.portada 
+        $randQuery = "SELECT u.nombre, l.libros_id, l.titulo, l.sinopsis, l.autor, l.portada 
                       FROM usuarios u 
                       INNER JOIN libros l ON u.usuario_id = l.usuarios_usuario_id
                       ORDER BY RAND() LIMIT 1";
         $randResult = $mysqli->query($randQuery);
         $libroRecomendado = $randResult->fetch_assoc();
     } else {
-        $query = "SELECT u.nombre, l.titulo, l.sinopsis, l.autor, l.portada 
+        $query = "SELECT u.nombre, l.libros_id, l.titulo, l.sinopsis, l.autor, l.portada 
                   FROM usuarios u 
                   INNER JOIN libros l ON u.usuario_id = l.usuarios_usuario_id";
         $conditions = [];
@@ -44,6 +43,16 @@ if ($hayFiltros) {
             $params[] = $filtroTitulo;
             $types .= "s";
         }
+        if ($filtroGenero) {
+            $conditions[] = "l.libros_id IN (
+                SELECT lg.libro_id 
+                FROM libro_genero lg 
+                INNER JOIN generos g ON g.genero_id = lg.genero_id 
+                WHERE g.nombre = ?
+            )";
+            $params[] = $filtroGenero;
+            $types .= "s";
+        }
 
         if ($conditions) {
             $query .= " WHERE " . implode(" AND ", $conditions);
@@ -57,7 +66,6 @@ if ($hayFiltros) {
         $librosFiltrados = $stmt->get_result();
     }
 } else {
-    // --- Si no hay filtros, mostrar librerías completas ---
     $usuarios = obtenerUsuariosConLibros($mysqli);
 }
 ?>
@@ -69,7 +77,6 @@ if ($hayFiltros) {
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Barra de navegación superior -->
   <nav class="navbar">
     <div class="nav-left">
       <h1>Usuarios y sus libros</h1>
@@ -106,6 +113,18 @@ if ($hayFiltros) {
       </select>
     </div>
 
+    <div class="filter-group">
+      <label>Filtrar por género:</label>
+      <select name="genero">
+        <option value="">-- Todos --</option>
+        <?php while ($g = $generos->fetch_assoc()): ?>
+          <option value="<?= htmlspecialchars($g['nombre']) ?>" <?= $filtroGenero == $g['nombre'] ? 'selected' : '' ?>>
+            <?= htmlspecialchars($g['nombre']) ?>
+          </option>
+        <?php endwhile; ?>
+      </select>
+    </div>
+
     <div class="filter-actions">
       <button type="submit">Aplicar filtros</button>
       <a href="home.php" class="btn">Limpiar</a>
@@ -124,6 +143,7 @@ if ($hayFiltros) {
             <div class="info">
               <h3><?= htmlspecialchars($libroRecomendado['titulo']) ?></h3>
               <p class="sinopsis"><?= htmlspecialchars($libroRecomendado['sinopsis']) ?></p>
+              <p class="generos">Géneros: <?= htmlspecialchars(implode(", ", obtenerGenerosDelLibro($libroRecomendado['libros_id'], $mysqli))) ?></p>
               <div class="acciones">
                 <em>Subido por <?= htmlspecialchars($libroRecomendado['nombre']) ?></em>
               </div>
@@ -141,6 +161,7 @@ if ($hayFiltros) {
               <div class="info">
                 <h3><?= htmlspecialchars($libro['titulo']) ?></h3>
                 <p class="sinopsis"><?= htmlspecialchars($libro['sinopsis']) ?></p>
+                <p class="generos">Géneros: <?= htmlspecialchars(implode(", ", obtenerGenerosDelLibro($libro['libros_id'], $mysqli))) ?></p>
                 <div class="acciones">
                   <em>Subido por <?= htmlspecialchars($libro['nombre']) ?></em>
                 </div>
@@ -165,6 +186,7 @@ if ($hayFiltros) {
                 <div class="info">
                   <h3><?= htmlspecialchars($libro['titulo']) ?></h3>
                   <p class="sinopsis"><?= htmlspecialchars($libro['sinopsis']) ?></p>
+                  <p class="generos">Géneros: <?= htmlspecialchars(implode(", ", obtenerGenerosDelLibro($libro['libros_id'], $mysqli))) ?></p>
                 </div>
               </div>
             <?php endif; ?>

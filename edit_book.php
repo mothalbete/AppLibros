@@ -4,75 +4,125 @@ require_once("config.php");
 require_once("functions.php");
 
 $usuario_id = $_SESSION['usuario_id'];
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$libro_id = (int)($_GET['id'] ?? 0);
+$mensaje = "";
 
-if ($id <= 0) {
-    die("ID de libro inválido.");
-}
-
-// Obtener libro y verificar propiedad
-$stmt = $mysqli->prepare("SELECT * FROM libros WHERE libros_id = ?");
-$stmt->bind_param("i", $id);
+// Verificar propiedad del libro
+$stmt = $mysqli->prepare("SELECT * FROM libros WHERE libros_id = ? AND usuarios_usuario_id = ?");
+$stmt->bind_param("ii", $libro_id, $usuario_id);
 $stmt->execute();
-$result = $stmt->get_result();
-$libro = $result->fetch_assoc();
+$libro = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$libro) {
-    die("Libro no encontrado.");
-}
-if ((int)$libro['usuarios_usuario_id'] !== (int)$usuario_id) {
-    die("No tienes permiso para editar este libro.");
+    header("Location: dashboard.php");
+    exit();
 }
 
-$error = "";
+// Géneros actuales del libro
+$generosActuales = [];
+$stmt = $mysqli->prepare("SELECT g.genero_id 
+                          FROM libro_genero lg 
+                          INNER JOIN generos g ON g.genero_id = lg.genero_id 
+                          WHERE lg.libro_id = ?");
+$stmt->bind_param("i", $libro_id);
+$stmt->execute();
+$res = $stmt->get_result();
+while ($row = $res->fetch_assoc()) {
+    $generosActuales[] = (int)$row['genero_id'];
+}
+$stmt->close();
+
+// Lista completa de géneros
+$generos = $mysqli->query("SELECT genero_id, nombre FROM generos ORDER BY nombre ASC");
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $titulo   = trim($_POST['titulo'] ?? '');
-    $sinopsis = trim($_POST['sinopsis'] ?? '');
-    $autor    = trim($_POST['autor'] ?? '');
-    $portada  = trim($_POST['portada'] ?? '');
+    $titulo   = trim($_POST['titulo'] ?? "");
+    $sinopsis = trim($_POST['sinopsis'] ?? "");
+    $autor    = trim($_POST['autor'] ?? "");
+    $portada  = trim($_POST['portada'] ?? "");
+    $generosSeleccionados = array_map('intval', $_POST['generos'] ?? []);
 
-    if ($titulo && $sinopsis && $autor) {
-        if (editarLibro($id, $titulo, $sinopsis, $autor, $portada, $mysqli)) {
+    if ($titulo === "" || $autor === "") {
+        $mensaje = "Título y autor son obligatorios.";
+    } else {
+        if (editarLibro($libro_id, $titulo, $sinopsis, $autor, $portada, $mysqli)) {
+            // Actualizar géneros: borrar y reinsertar
+            $del = $mysqli->prepare("DELETE FROM libro_genero WHERE libro_id = ?");
+            $del->bind_param("i", $libro_id);
+            $del->execute();
+            $del->close();
+
+            if (!empty($generosSeleccionados)) {
+                $ins = $mysqli->prepare("INSERT INTO libro_genero (libro_id, genero_id) VALUES (?, ?)");
+                foreach ($generosSeleccionados as $gid) {
+                    $ins->bind_param("ii", $libro_id, $gid);
+                    $ins->execute();
+                }
+                $ins->close();
+            }
+
             header("Location: dashboard.php");
             exit();
         } else {
-            $error = "No se pudieron guardar los cambios.";
+            $mensaje = "Error al guardar cambios.";
         }
-    } else {
-        $error = "Todos los campos salvo portada son obligatorios.";
     }
 }
 ?>
-<h1>Editar libro</h1>
-
-<?php if (!empty($error)): ?>
-  <p style="color:red;"><?= htmlspecialchars($error) ?></p>
-<?php endif; ?>
-
-<?php if (!empty($libro['portada'])): ?>
-  <p>
-    <strong>Portada actual:</strong><br>
-    <img src="<?= htmlspecialchars($libro['portada']) ?>" alt="Portada" width="160">
-  </p>
-<?php endif; ?>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Editar libro</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<form method="post">
-  <label>Título:</label><br>
-  <input type="text" name="titulo" value="<?= htmlspecialchars($libro['titulo']) ?>" required><br><br>
+<body>
+  <nav class="navbar">
+    <div class="nav-left"><h1>Editar libro</h1></div>
+    <div class="nav-right">
+      <a href="dashboard.php">Dashboard</a>
+      <a href="logout.php">Cerrar sesión</a>
+    </div>
+  </nav>
 
-  <label>Sinopsis:</label><br>
-  <textarea name="sinopsis" rows="6" cols="60" required><?= htmlspecialchars($libro['sinopsis']) ?></textarea><br><br>
+  <?php if ($mensaje): ?>
+    <p class="error" style="text-align:center;"><?= htmlspecialchars($mensaje) ?></p>
+  <?php endif; ?>
 
-  <label>Autor:</label><br>
-  <input type="text" name="autor" value="<?= htmlspecialchars($libro['autor']) ?>" required><br><br>
+  <form method="post" class="form edit-form">
+    <div class="form-group">
+      <label>Título</label>
+      <input type="text" name="titulo" value="<?= htmlspecialchars($libro['titulo']) ?>" required>
+    </div>
 
-  <label>Portada (URL):</label><br>
-  <input type="url" name="portada" value="<?= htmlspecialchars($libro['portada']) ?>"><br><br>
+    <div class="form-group">
+      <label>Autor</label>
+      <input type="text" name="autor" value="<?= htmlspecialchars($libro['autor']) ?>" required>
+    </div>
 
-  <button type="submit">Guardar cambios</button>
-</form>
+    <div class="form-group">
+      <label>Sinopsis</label>
+      <textarea name="sinopsis" rows="5"><?= htmlspecialchars($libro['sinopsis']) ?></textarea>
+    </div>
 
-<p><a href="dashboard.php">Volver al dashboard</a></p>
+    <div class="form-group">
+      <label>URL de portada</label>
+      <input type="url" name="portada" value="<?= htmlspecialchars($libro['portada']) ?>">
+    </div>
+
+    <div class="form-group">
+      <label>Géneros (puedes seleccionar varios)</label>
+      <select name="generos[]" multiple size="6" required>
+        <?php while ($g = $generos->fetch_assoc()): ?>
+          <option value="<?= (int)$g['genero_id'] ?>" <?= in_array((int)$g['genero_id'], $generosActuales) ? 'selected' : '' ?>>
+            <?= htmlspecialchars($g['nombre']) ?>
+          </option>
+        <?php endwhile; ?>
+      </select>
+    </div>
+
+    <button type="submit">Guardar</button>
+  </form>
+</body>
+</html>

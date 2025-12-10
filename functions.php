@@ -16,29 +16,24 @@ function iniciarSesion($nombre, $password, $mysqli) {
 }
 
 function registrarUsuario($nombre, $email, $password, $mysqli) {
-    // Comprobar si ya existe el nombre
     $stmt = $mysqli->prepare("SELECT usuario_id FROM usuarios WHERE nombre=?");
     $stmt->bind_param("s", $nombre);
     $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
+    if ($stmt->get_result()->num_rows > 0) {
         $stmt->close();
         return "nombre_existente";
     }
     $stmt->close();
 
-    // Comprobar si ya existe el email
     $stmt = $mysqli->prepare("SELECT usuario_id FROM usuarios WHERE email=?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
+    if ($stmt->get_result()->num_rows > 0) {
         $stmt->close();
         return "email_existente";
     }
     $stmt->close();
 
-    // Insertar si no existe ni nombre ni email
     $stmt = $mysqli->prepare("INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)");
     $stmt->bind_param("sss", $nombre, $email, $password);
     $ok = $stmt->execute();
@@ -48,7 +43,7 @@ function registrarUsuario($nombre, $email, $password, $mysqli) {
 }
 
 function obtenerUsuariosConLibros($mysqli) {
-    $sql = "SELECT u.nombre, l.titulo, l.sinopsis, l.portada 
+    $sql = "SELECT u.nombre, l.libros_id, l.titulo, l.sinopsis, l.portada 
             FROM usuarios u 
             LEFT JOIN libros l ON u.usuario_id = l.usuarios_usuario_id";
     $result = $mysqli->query($sql);
@@ -91,5 +86,22 @@ function eliminarLibro($id, $mysqli) {
     $ok = $stmt->execute();
     $stmt->close();
     return $ok;
+}
+
+/* --- NUEVO: géneros --- */
+function obtenerGenerosDelLibro($libro_id, $mysqli) {
+    $stmt = $mysqli->prepare("SELECT g.nombre 
+                              FROM libro_genero lg 
+                              INNER JOIN generos g ON g.genero_id = lg.genero_id 
+                              WHERE lg.libro_id = ?");
+    $stmt->bind_param("i", $libro_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $generos = [];
+    while ($row = $result->fetch_assoc()) {
+        $generos[] = $row['nombre'];
+    }
+    $stmt->close();
+    return $generos;
 }
 ?>

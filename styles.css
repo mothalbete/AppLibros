@@ -258,6 +258,97 @@ h1, h2 {
   background: #4e342e;
 }
 
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* más espacio entre bloques */
+  max-width: 700px;
+  margin: 30px auto;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.edit-form button {
+  align-self: flex-start;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: #0ea5e9;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.edit-form button:hover {
+  background: #0284c7;
+}
+
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* espacio entre bloques */
+  max-width: 700px;
+  margin: 30px auto;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.add-form button {
+  align-self: flex-start;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: #0ea5e9;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.add-form button:hover {
+  background: #0284c7;
+}
+
+
 /* Responsivo para filtros */
 @media (max-width: 600px) {
   .filters {
