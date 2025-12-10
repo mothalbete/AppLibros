@@ -1,0 +1,208 @@
+/* Estilo general */
+body {
+  font-family: 'Merriweather', serif;
+  background: #fdf6e3; /* tono cálido */
+  margin: 0;
+  padding: 20px;
+  color: #3e2723; /* marrón oscuro */
+}
+
+h1, h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #5d4037; /* marrón medio */
+}
+
+/* Barra de navegación superior estilo librería */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #8d6e63; /* tono madera */
+  color: #fff;
+  padding: 12px 20px;
+  border-bottom: 4px solid #5d4037;
+}
+
+.navbar h1 {
+  margin: 0;
+  font-size: 1.4em;
+  color: #fff;
+  font-family: 'Georgia', serif;
+}
+
+.navbar .nav-right a {
+  color: #fff;
+  margin-left: 15px;
+  font-weight: 600;
+}
+.navbar .nav-right a:hover {
+  text-decoration: underline;
+}
+
+/* Bloque de cada usuario (su librería) */
+.usuario-libreria {
+  background: #fff8e1; /* tono pergamino */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(93,64,55,0.3);
+  margin-bottom: 40px;
+  padding: 20px;
+  border: 2px solid #d7ccc8;
+}
+
+.usuario-libreria h2 {
+  margin-bottom: 15px;
+  color: #6d4c41;
+  font-family: 'Georgia', serif;
+}
+
+/* Carrusel horizontal estilo estantería */
+.carrusel {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scroll-snap-type: x mandatory;
+  border-top: 3px solid #d7ccc8;
+  border-bottom: 3px solid #d7ccc8;
+  background: #efebe9;
+}
+
+.carrusel::-webkit-scrollbar {
+  height: 8px;
+}
+.carrusel::-webkit-scrollbar-thumb {
+  background: #6d4c41;
+  border-radius: 4px;
+}
+
+/* Tarjeta de libro estilo lomo */
+.libro {
+  position: relative;
+  flex: 0 0 auto;
+  width: 180px;
+  height: 260px;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  scroll-snap-align: start;
+  box-shadow: 0 2px 8px rgba(93,64,55,0.4);
+  transition: transform 0.3s ease;
+  background: #fff;
+}
+
+.libro:hover {
+  transform: scale(1.05);
+}
+
+.libro img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Overlay con título, sinopsis y botones */
+.libro .info {
+  position: absolute;
+  inset: 0;
+  background: rgba(93,64,55,0.85); /* marrón oscuro translúcido */
+  color: #fff;
+  opacity: 0;
+  padding: 15px;
+  transition: opacity 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.libro:hover .info {
+  opacity: 1;
+}
+
+.libro .info h3 {
+  margin: 0 0 10px;
+  font-size: 1.1em;
+  font-family: 'Georgia', serif;
+}
+
+.libro .info .sinopsis {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 120px;
+  margin: 10px 0;
+  font-size: 0.9em;
+  line-height: 1.3;
+}
+
+.libro .info .acciones {
+  margin-top: 10px;
+}
+
+/* Botones generales */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: #6d4c41;
+  color: #fff;
+  text-align: center;
+  transition: background 0.3s ease;
+}
+.btn:hover {
+  background: #4e342e;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .usuario-libreria {
+    padding: 15px;
+  }
+
+  .carrusel {
+    gap: 10px;
+  }
+
+  .libro {
+    width: 140px;
+    height: 200px;
+  }
+
+  form {
+    width: 90%;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1, h2 {
+    font-size: 1.2em;
+  }
+
+  .carrusel {
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .libro {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .libro img {
+    height: auto;
+    max-height: 200px;
+  }
+
+  .libro .info .sinopsis {
+    max-height: 80px;
+  }
+}
